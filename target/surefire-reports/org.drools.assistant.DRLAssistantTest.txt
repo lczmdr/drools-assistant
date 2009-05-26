@@ -1,0 +1,9 @@
+-------------------------------------------------------------------------------
+Test set: org.drools.assistant.DRLAssistantTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.087 sec <<< FAILURE!
+testCreation(org.drools.assistant.DRLAssistantTest)  Time elapsed: 0.013 sec  <<< ERROR!
+java.lang.ClassCastException: java.util.ArrayList
+	at org.drools.assistant.processor.DRLRefactorProcessor.getRuleAssistant(DRLRefactorProcessor.java:15)
+	at org.drools.assistant.DRLAssistantTest.testCreation(DRLAssistantTest.java:17)
+
