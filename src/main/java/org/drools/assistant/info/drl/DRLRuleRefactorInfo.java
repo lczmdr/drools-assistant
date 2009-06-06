@@ -2,74 +2,68 @@ package org.drools.assistant.info.drl;
 
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.drools.assistant.info.RuleRefactorInfo;
 
 public class DRLRuleRefactorInfo implements RuleRefactorInfo {
+
+	Map<Integer, RuleBasicContentInfo> contents;
 	
-	private String packageName;
-	private Integer packageIndex;
-	private Map<Integer, String> imports;
-	private Map<Integer, String> globals;
-	private Map<Integer, String> expanders;
-	private Map<Integer, String> functions;
-	private Map<Integer, String> functionsImports;
-	private Map<Integer, String> queries;
-	private List<DRLRuleRefactorContentInfo> rules; 
+	public DRLRuleRefactorInfo() {
+		contents = new TreeMap<Integer, RuleBasicContentInfo>();
+	}
 	
-	public DRLRuleRefactorInfo() {	}
+	public void addContent(DRLContentTypeEnum type, Integer offset, String content) {
+		this.contents.put(offset, new RuleBasicContentInfo(offset, content, type));
+	}
 	
-	public String getPackageName() {
-		return packageName;
+	public void addContent(DRLContentTypeEnum type, int offset, String content, String ruleName, List<RuleLineContentInfo> lhs, List<RuleLineContentInfo> rhs) {
+		RuleDRLContentInfo contentInfo = new RuleDRLContentInfo(offset, content, type, ruleName, lhs, rhs);
+		for (RuleLineContentInfo ruleLine : contentInfo.getLHSRuleLines())
+			ruleLine.setRule(contentInfo);
+		for (RuleLineContentInfo ruleLine : contentInfo.getRHSRuleLines())
+			ruleLine.setRule(contentInfo);
+		this.contents.put(offset, contentInfo);
 	}
-	public void setPackageName(String packageName, Integer packageIndex) {
-		this.packageName = packageName;
-		this.packageIndex = packageIndex;
+	
+	public RuleBasicContentInfo getContentAt(int offset) {
+		if (contents.containsKey(offset))
+			return contents.get(offset);
+		int previousKey = 0;
+		for (Integer key : contents.keySet()) {
+			if (key > offset) {
+				RuleBasicContentInfo info = contents.get(previousKey);
+				if ((previousKey + info.getContentLength()) >= offset) {
+					if (info.getType().equals(DRLContentTypeEnum.RULE))
+						return searchInsideTheRule(offset, (RuleDRLContentInfo) info);
+					return info;
+				}
+				return null;
+			}
+			previousKey = key;
+		}
+		RuleBasicContentInfo info = contents.get(previousKey);
+		if (info.getType().equals(DRLContentTypeEnum.RULE))
+			return searchInsideTheRule(offset, (RuleDRLContentInfo) info);
+		return (info.getContentLength() + previousKey > offset)?info:null;
 	}
-	public Integer getPackageIndex() {
-		return this.packageIndex;
-	}
-	public Map<Integer, String> getImports() {
-		return imports;
-	}
-	public void setImports(Map<Integer, String> imports) {
-		this.imports = imports;
-	}
-	public Map<Integer, String> getGlobals() {
-		return globals;
-	}
-	public void setGlobals(Map<Integer, String> globals) {
-		this.globals = globals;
-	}
-	public Map<Integer, String> getExpanders() {
-		return expanders;
-	}
-	public void setExpanders(Map<Integer, String> expanders) {
-		this.expanders = expanders;
-	}
-	public Map<Integer, String> getFunctions() {
-		return functions;
-	}
-	public void setFunctions(Map<Integer, String> functions) {
-		this.functions = functions;
-	}
-	public Map<Integer, String> getFunctionsImports() {
-		return functionsImports;
-	}
-	public void setFunctionsImports(Map<Integer, String> functionsImports) {
-		this.functionsImports = functionsImports;
-	}
-	public void setQueries(Map<Integer, String> queries) {
-		this.queries = queries;
-	}
-	public Map<Integer, String> getQueries() {
-		return queries;
-	}
-	public List<DRLRuleRefactorContentInfo> getRules() {
-		return rules;
-	}
-	public void setRules(List<DRLRuleRefactorContentInfo> rules) {
-		this.rules = rules;
+	
+	private RuleBasicContentInfo searchInsideTheRule(int offset, RuleDRLContentInfo info) {
+		// search if inside the rulename
+		if (offset <= info.getRuleNameLength() + info.getOffset())
+			return null;
+		// search in LHS
+		for(RuleLineContentInfo ruleLine : info.getLHSRuleLines()) {
+			if (offset <= ruleLine.getOffset() + ruleLine.getContentLength())
+				return ruleLine;
+		}
+		// search in RHS
+		for(RuleLineContentInfo ruleLine : info.getRHSRuleLines()) {
+			if (offset <= ruleLine.getOffset() + ruleLine.getContentLength())
+				return ruleLine;
+		}
+		return null;
 	}
 	
 }

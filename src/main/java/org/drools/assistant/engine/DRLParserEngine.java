@@ -1,11 +1,13 @@
 package org.drools.assistant.engine;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.drools.assistant.info.RuleRefactorInfo;
+import org.drools.assistant.info.drl.DRLContentTypeEnum;
 import org.drools.assistant.info.drl.DRLRuleRefactorInfo;
+import org.drools.assistant.info.drl.RuleLineContentInfo;
 
 /**
  * A simple DRL parser implemented with regular expressions to get the offset of rule components
@@ -15,20 +17,29 @@ import org.drools.assistant.info.drl.DRLRuleRefactorInfo;
  */
 public class DRLParserEngine extends AbstractParserEngine {
 	
-	// Regulars expressions to match DRL Rule 
-	private static final String PACKAGE_PATTERN = "package[\\s]+[a-z\\.]*;"; // OK
-	private static final String IMPORT_PATTERN = "import[\\s]+[\\w\\.]*;"; // OK
-	private static final String GLOBAL_PATTERN = "global[\\s]+[\\w\\.]*[\\s]+[\\w]*[\\s]+"; // OK
-	private static final String EXPANDER_PATTERN = "expander[\\s]+[\\w\\D]+\\.dsl"; // OK
-	private static final String FUNCTION_PATTERN = "function[\\s]+[a-zA-Z]+[\\s]+[\\w\\d]*\\([\\w\\d\\s\\,]*\\)[\\s]*\\{[\\w\\s\\d\\\"\\+\\-\\,\\;\\!\\n\\*\\.\\(\\)]*\\}"; // Works, but mus be changed
-	private static final String FUNCTION_IMPORT_PATTERN = "import[\\s]+function[\\s]+[\\w\\.]*"; // OK
-	private static final String QUERY_PATTERN = "query[\\s]+[(^end)\\w\\\"\\s\\:\\(\\)]*"; // don't works
-	private static final String RULE_PATTERN = "rule[\\w\\s\\D]*end"; // don't works with more that one rule
-	private static final String RULE_LHS_PATTERN = "when[\\s\\w\\D]*then"; // OK
-	private static final String RULE_RHS_PATTERN = "then[\\s\\w\\D]*end"; // OK
-	private static final String RULE_LINES = "[\\w\\s]*\\n"; // don't works
+	private static final String RULE_DECLARATION = "(rule|RULE)";
+	private static final String PACKAGE_DECLARATION = "(package|PACKAGE)";
+	private static final String IMPORT_DECLARATION = "(import|IMPORT)";
+	private static final String GLOBAL_DECLARATION = "(global|GLOBAL)";
+	private static final String RULE_WHEN_DECLARATION = "(when|WHEN)";
+	private static final String RULE_THEN_DECLARATION = "(then|THEN)";
+	private static final String RULE_END_DECLARATION = "(end|END)";
 	
-	private Map<Integer, String> content;
+	private static final String OPTIONAL_CR = "[\n]*";
+	
+	private static final String FULLY_QUALIFIED_NAME = "[\\w\\.]*";
+	private static final String ONE_OR_MORE_SPACES = "[\\s]+";
+	private static final String RULE_NAME = "(\"){1}[\\s\\w\\d]*(\"){1}";
+	
+	// Regulars expressions to match DRL Rule 
+	private static final String PACKAGE_PATTERN = PACKAGE_DECLARATION + ONE_OR_MORE_SPACES + FULLY_QUALIFIED_NAME + ";"; // OK
+	private static final String IMPORT_PATTERN = IMPORT_DECLARATION + ONE_OR_MORE_SPACES + FULLY_QUALIFIED_NAME + ";"; // OK
+	private static final String GLOBAL_PATTERN = GLOBAL_DECLARATION + ONE_OR_MORE_SPACES + FULLY_QUALIFIED_NAME + ONE_OR_MORE_SPACES + "[\\w]*" + ONE_OR_MORE_SPACES + ""; // OK
+
+	private static final String RULE_PATTERN = RULE_DECLARATION + ONE_OR_MORE_SPACES + RULE_NAME + OPTIONAL_CR + RULE_WHEN_DECLARATION + OPTIONAL_CR + "[\\w\\W]*"; // works only with one rule :(
+	private static final String RULE_NAME_PATTERN = RULE_DECLARATION + ONE_OR_MORE_SPACES + RULE_NAME;
+	private static final String RULE_LHS_PATTERN = RULE_WHEN_DECLARATION + ONE_OR_MORE_SPACES + "[\\w\\W]*" + RULE_THEN_DECLARATION;
+	private static final String RULE_RHS_PATTERN = RULE_THEN_DECLARATION + ONE_OR_MORE_SPACES + "[\\w\\W]*" + RULE_END_DECLARATION;
 	
 	public DRLParserEngine(String rule) {
 		this.ruleRefactorInfo = new DRLRuleRefactorInfo();
@@ -38,11 +49,7 @@ public class DRLParserEngine extends AbstractParserEngine {
 	public RuleRefactorInfo parse() {
 		detectPackage(rule);
 		detectGlobals(rule);
-		detectExpanders(rule);
 		detectImports(rule);
-		detectFunctions(rule);
-		detectFunctionsImports(rule);
-		detectQueries(rule);
 		detectRules(rule);
 		return ruleRefactorInfo;
 	}
@@ -50,102 +57,70 @@ public class DRLParserEngine extends AbstractParserEngine {
 	private void detectPackage(CharSequence rule) {
 		pattern = Pattern.compile(PACKAGE_PATTERN);
 		matcher = pattern.matcher(rule);
-		content = new HashMap<Integer, String>();
 		if (matcher.find())
-			((DRLRuleRefactorInfo) ruleRefactorInfo).setPackageName(matcher.group(), matcher.start());
+			((DRLRuleRefactorInfo) ruleRefactorInfo).addContent(DRLContentTypeEnum.PACKAGE, matcher.start(), matcher.group());
 	}
 
 	private void detectImports(CharSequence rule) {
 		pattern = Pattern.compile(IMPORT_PATTERN);
 		matcher = pattern.matcher(rule);
-		content = new HashMap<Integer, String>();
 		while (matcher.find())
-			content.put(matcher.start(), matcher.group());
-		((DRLRuleRefactorInfo) ruleRefactorInfo).setImports(content);
+			((DRLRuleRefactorInfo) ruleRefactorInfo).addContent(DRLContentTypeEnum.IMPORT, matcher.start(), matcher.group());
 	}
 	
 	private void detectGlobals(CharSequence rule) {
 		pattern = Pattern.compile(GLOBAL_PATTERN);
 		matcher = pattern.matcher(rule);
-		content = new HashMap<Integer, String>();
 		while (matcher.find())
-			content.put(matcher.start(), matcher.group());
-		((DRLRuleRefactorInfo) ruleRefactorInfo).setGlobals(content);
-	}
-	
-	private void detectExpanders(CharSequence rule) {
-		pattern = Pattern.compile(EXPANDER_PATTERN);
-		matcher = pattern.matcher(rule);
-		content = new HashMap<Integer, String>();
-		while (matcher.find())
-			content.put(matcher.start(), matcher.group());
-		((DRLRuleRefactorInfo) ruleRefactorInfo).setExpanders(content);
-	}
-	 
-	private void detectFunctions(CharSequence rule) {
-		pattern = Pattern.compile(FUNCTION_PATTERN);
-		matcher = pattern.matcher(rule);
-		content = new HashMap<Integer, String>();
-		while (matcher.find())
-			content.put(matcher.start(), matcher.group());
-		((DRLRuleRefactorInfo) ruleRefactorInfo).setFunctions(content);
-	}
-	
-	private void detectFunctionsImports(CharSequence rule) {
-		pattern = Pattern.compile(FUNCTION_IMPORT_PATTERN);
-		matcher = pattern.matcher(rule);
-		content = new HashMap<Integer, String>();
-		while (matcher.find())
-			content.put(matcher.start(), matcher.group());
-		((DRLRuleRefactorInfo) ruleRefactorInfo).setFunctionsImports(content);
-	}
-	
-	private void detectQueries(CharSequence rule) {
-		pattern = Pattern.compile(QUERY_PATTERN);
-		matcher = pattern.matcher(rule);
-		content = new HashMap<Integer, String>();
-		while (matcher.find())
-			content.put(matcher.start(), matcher.group());
-		((DRLRuleRefactorInfo) ruleRefactorInfo).setQueries(content);
+			((DRLRuleRefactorInfo) ruleRefactorInfo).addContent(DRLContentTypeEnum.GLOBAL, matcher.start(), matcher.group());
 	}
 	
 	private void detectRules(CharSequence rule) {
 		pattern = Pattern.compile(RULE_PATTERN);
 		matcher = pattern.matcher(rule);
-		content = new HashMap<Integer, String>();
 		while (matcher.find()) {
-			System.out.println(matcher.group() + "\n\t starting at index " + matcher.start() + " and ending at index " + matcher.end());
-			detectLHS(matcher.group());
-//			detectRHS(matcher.group());
+			String value = matcher.group();
+			int offset = matcher.start();
+			String ruleName = detectRuleName(value);
+			List<RuleLineContentInfo> lhs = detectLHS(value, offset);
+			List<RuleLineContentInfo> rhs = detectRHS(value, offset);
+			((DRLRuleRefactorInfo) ruleRefactorInfo).addContent(DRLContentTypeEnum.RULE, offset, value, ruleName, lhs, rhs);
 		}
 	}
 	
-	private void detectLHS(CharSequence rule) {
-		System.out.println("-----------LHS------------");
+	private String detectRuleName(CharSequence rule) {
+		pattern = Pattern.compile(RULE_NAME_PATTERN);
+		matcher = pattern.matcher(rule);
+		if (matcher.find())
+			return matcher.group();
+		return null;
+	}
+	
+	private List<RuleLineContentInfo> detectLHS(CharSequence rule, int ruleOffset) {
 		pattern = Pattern.compile(RULE_LHS_PATTERN);
 		matcher = pattern.matcher(rule);
-		while (matcher.find()) {
-			System.out.println(matcher.group() + "\n\t starting at index " + matcher.start() + " and ending at index " + matcher.end());
-			detectLines(matcher.group());
-		}
+		if (matcher.find())
+			return detectLines(matcher.group(), matcher.start() + ruleOffset, DRLContentTypeEnum.RULE_LHS_LINE);
+		return null;
 	}
 	
-	private void detectRHS(CharSequence rule) {
-		System.out.println("-----------RHS------------");
+	private List<RuleLineContentInfo> detectRHS(CharSequence rule, int ruleOffset) {
 		pattern = Pattern.compile(RULE_RHS_PATTERN);
 		matcher = pattern.matcher(rule);
-		while (matcher.find()) {
-			System.out.println(matcher.group() + "\n\t starting at index " + matcher.start() + " and ending at index " + matcher.end());
-			detectLines(matcher.group());
-		}
+		if (matcher.find())
+			return detectLines(matcher.group(), matcher.start() + ruleOffset, DRLContentTypeEnum.RULE_RHS_LINE);
+		return null;
 	}
 	
-	private void detectLines(CharSequence rule) {
-		System.out.println("-----------Lines------------");
-		pattern = Pattern.compile(RULE_LINES);
+	private List<RuleLineContentInfo> detectLines(CharSequence rule, int lineOffset, DRLContentTypeEnum type) {
+		List<RuleLineContentInfo> ruleLines = new ArrayList<RuleLineContentInfo>();
+		pattern = Pattern.compile(".*");
 		matcher = pattern.matcher(rule);
-		while (matcher.find())
-			System.out.println(matcher.group() + "\n\t starting at index " + matcher.start() + " and ending at index " + matcher.end());
+		while (matcher.find()) {
+			if (matcher.start()!=matcher.end())
+				ruleLines.add(new RuleLineContentInfo(matcher.start()+lineOffset, matcher.group(), type));
+		}
+		return ruleLines;
 	}
 
 }

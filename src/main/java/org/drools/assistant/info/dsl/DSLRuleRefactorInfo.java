@@ -22,5 +22,4 @@ public class DSLRuleRefactorInfo implements RuleRefactorInfo {
 		this.then = then;
 	}
 	
-	
 }
