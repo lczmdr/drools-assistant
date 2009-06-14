@@ -37,8 +37,8 @@ public class DRLParserEngineTest extends TestCase {
 		"}\n" +
 		"rule   \"My Test Rule\"\n" +
 		"when\n"+ 
-		"	$employee : Employee($age : age > 80, $company : company)\n" +
-		"	$result : Company(company==$company, retireAge <= $age)\n" + 
+		"	$employee : Employee($company : company, $age : age > 80, salary > 400)\n" +
+		"	$result : Company(company == $company, retireAge <= $age)\n" + 
 		"then\n"+ 
 		"	System.out.println(\"can retire\")\n" +
 		"end\n";
@@ -84,6 +84,27 @@ public class DRLParserEngineTest extends TestCase {
 		info = (DRLRuleRefactorInfo) engine.parse();
 		RuleBasicContentInfo content = info.getContentAt(830);
 		Assert.assertEquals(true, content!=null);
+		System.out.println(content.getType() + " -> " + content.getContent() + " from " + content.getOffset() + " to " + (content.getOffset()+content.getContentLength()));
+	}
+	
+	public void testSampleDRL() {
+		rule = "package com.sample\n\n" +
+				"import com.sample.DroolsTest.Message;\n" +
+				"import com.sample.Prueba;\n\n" +
+				"rule \"Hello World\"\n" +
+						"\twhen\n" +
+						"\t\tm : Message( status == Message.HELLO, myMessage : message )\n" +
+						"\t\tPrueba()\n" +
+						"\tthen\n" +
+						"\t\tSystem.out.println( myMessage );\n" +
+						"\t\tm.setMessage( \"Goodbye cruel world\" );\n" +
+						"\t\tm.setStatus( Message.GOODBYE );\n" +
+						"\t\tupdate( m );\n" +
+						"end";
+		System.out.println(rule);
+		engine = new DRLParserEngine(rule);
+		info = (DRLRuleRefactorInfo) engine.parse();
+		RuleBasicContentInfo content = info.getContentAt(173);
 		System.out.println(content.getType() + " -> " + content.getContent() + " from " + content.getOffset() + " to " + (content.getOffset()+content.getContentLength()));
 	}
 	

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.drools.assistant.info.RuleRefactorInfo;
+import org.drools.assistant.info.drl.RuleBasicContentInfo;
 import org.drools.assistant.option.AssistantOption;
 
 public class DSLRuleRefactor extends AbstractRuleRefactor {
@@ -17,20 +18,25 @@ public class DSLRuleRefactor extends AbstractRuleRefactor {
 	
 	@Override
 	public List<AssistantOption> execute(int offset) {
-		if ((option = this.bindVariable())!=null)
+		if ((option = this.bindVariable(null))!=null)
 			this.options.add(option);
-		if ((option = this.fixImports())!=null)
+		if ((option = this.fixImports(null))!=null)
 			this.options.add(option);
 		return this.options;
 	}
 
 	@Override
-	protected AssistantOption bindVariable() {
+	protected AssistantOption bindVariable(RuleBasicContentInfo contentInfo) {
 		return null;
 	}
 
 	@Override
-	protected AssistantOption fixImports() {
+	protected AssistantOption fixImports(RuleBasicContentInfo contentInfo) {
+		return null;
+	}
+
+	@Override
+	protected AssistantOption renameVariable(RuleBasicContentInfo contentInfo) {
 		return null;
 	}
 

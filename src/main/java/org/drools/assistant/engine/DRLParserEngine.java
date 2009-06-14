@@ -26,19 +26,21 @@ public class DRLParserEngine extends AbstractParserEngine {
 	private static final String RULE_END_DECLARATION = "(end|END)";
 	
 	private static final String OPTIONAL_CR = "[\n]*";
+	private static final String OPTIONAL_TAB = "[\t]*";
+	private static final String OPTIONAL_SPACES = "[\\s]*";
 	
 	private static final String FULLY_QUALIFIED_NAME = "[\\w\\.]*";
 	private static final String ONE_OR_MORE_SPACES = "[\\s]+";
-	private static final String RULE_NAME = "(\"){1}[\\s\\w\\d]*(\"){1}";
+	private static final String RULE_NAME = "\"[\\s\\w]*\"";
 	
 	// Regulars expressions to match DRL Rule 
-	private static final String PACKAGE_PATTERN = PACKAGE_DECLARATION + ONE_OR_MORE_SPACES + FULLY_QUALIFIED_NAME + ";"; // OK
+	private static final String PACKAGE_PATTERN = PACKAGE_DECLARATION + ONE_OR_MORE_SPACES + FULLY_QUALIFIED_NAME + ";?"; // OK
 	private static final String IMPORT_PATTERN = IMPORT_DECLARATION + ONE_OR_MORE_SPACES + FULLY_QUALIFIED_NAME + ";"; // OK
 	private static final String GLOBAL_PATTERN = GLOBAL_DECLARATION + ONE_OR_MORE_SPACES + FULLY_QUALIFIED_NAME + ONE_OR_MORE_SPACES + "[\\w]*" + ONE_OR_MORE_SPACES + ""; // OK
 
-	private static final String RULE_PATTERN = RULE_DECLARATION + ONE_OR_MORE_SPACES + RULE_NAME + OPTIONAL_CR + RULE_WHEN_DECLARATION + OPTIONAL_CR + "[\\w\\W]*"; // works only with one rule :(
+	private static final String RULE_PATTERN = RULE_DECLARATION + ONE_OR_MORE_SPACES + RULE_NAME + "[" + OPTIONAL_CR + OPTIONAL_TAB + OPTIONAL_SPACES + "]*" + RULE_WHEN_DECLARATION + "[" + OPTIONAL_CR + OPTIONAL_TAB + OPTIONAL_SPACES + "]*" + "[\\w\\W]*"; // works only with one rule :(
 	private static final String RULE_NAME_PATTERN = RULE_DECLARATION + ONE_OR_MORE_SPACES + RULE_NAME;
-	private static final String RULE_LHS_PATTERN = RULE_WHEN_DECLARATION + ONE_OR_MORE_SPACES + "[\\w\\W]*" + RULE_THEN_DECLARATION;
+	private static final String RULE_LHS_PATTERN = RULE_WHEN_DECLARATION + ONE_OR_MORE_SPACES + OPTIONAL_TAB + "[\\w\\W]*" + RULE_THEN_DECLARATION;
 	private static final String RULE_RHS_PATTERN = RULE_THEN_DECLARATION + ONE_OR_MORE_SPACES + "[\\w\\W]*" + RULE_END_DECLARATION;
 	
 	public DRLParserEngine(String rule) {

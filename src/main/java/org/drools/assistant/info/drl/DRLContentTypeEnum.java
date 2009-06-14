@@ -2,21 +2,14 @@ package org.drools.assistant.info.drl;
 
 public enum DRLContentTypeEnum {
 	
-	PACKAGE("Package"),
-	IMPORT("Import"),
-	GLOBAL("Global"),
-	RULE("Rule"),
-	RULE_LHS_LINE("Rule LHS Line"),
-	RULE_RHS_LINE("Rule RHS Line");
+	PACKAGE,
+	IMPORT,
+	GLOBAL,
+	RULE,
+	RULE_LHS_LINE,
+	RULE_RHS_LINE;
 	
-	private String description;
-
-	DRLContentTypeEnum(String description) {
-		this.description = description;
-	}
-	
-	public String getDescription() {
-		return this.description;
+	DRLContentTypeEnum() {
 	}
 
 }

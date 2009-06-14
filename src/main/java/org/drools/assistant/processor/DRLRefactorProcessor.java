@@ -19,7 +19,8 @@ public class DRLRefactorProcessor extends AbstractRuleRefactorProcessor {
 	@Override
 	protected RuleRefactorInfo generateRuleRefactorInfo(String text) {
 		ruleParserEngine = new DRLParserEngine(text);
-		return ruleParserEngine.parse();
+		RuleRefactorInfo info = ruleParserEngine.parse();
+		return info;
 	}
 
 }

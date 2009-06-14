@@ -1,5 +1,6 @@
 package org.drools.assistant.info.drl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -8,7 +9,7 @@ import org.drools.assistant.info.RuleRefactorInfo;
 
 public class DRLRuleRefactorInfo implements RuleRefactorInfo {
 
-	Map<Integer, RuleBasicContentInfo> contents;
+	private Map<Integer, RuleBasicContentInfo> contents;
 	
 	public DRLRuleRefactorInfo() {
 		contents = new TreeMap<Integer, RuleBasicContentInfo>();
@@ -64,6 +65,16 @@ public class DRLRuleRefactorInfo implements RuleRefactorInfo {
 				return ruleLine;
 		}
 		return null;
+	}
+	
+	public List<RuleBasicContentInfo> getImports() {
+		List<RuleBasicContentInfo> imports = new ArrayList<RuleBasicContentInfo>();
+		for (Integer key : contents.keySet()) {
+			RuleBasicContentInfo info = contents.get(key);
+			if (info.getType().equals(DRLContentTypeEnum.IMPORT))
+				imports.add(info);
+		}
+		return imports;
 	}
 	
 }
