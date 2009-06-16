@@ -22,6 +22,8 @@ public class DRLRuleRefactor extends AbstractRuleRefactor {
 	public List<AssistantOption> execute(int offset) {
 		this.offset = offset;
 		RuleBasicContentInfo contentInfo = ((DRLRuleRefactorInfo)ruleRefactorInfo).getContentAt(offset);
+		if (contentInfo==null)
+			return this.options;
 		if ((option = this.bindVariable(contentInfo))!=null)
 			this.options.add(option);
 		if ((option = this.fixImports(contentInfo))!=null)

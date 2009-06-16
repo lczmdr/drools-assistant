@@ -42,6 +42,13 @@ public class DRLAssistantTest extends TestCase {
 		"	$result : Company(company==$company, retireAge <= $age)\n" + 
 		"then\n"+ 
 		"	System.out.println(\"can retire\")\n" +
+		"end\n"+
+		"rule   \"My Second Rule\"\n" +
+		"when\n"+ 
+		"	Driver(licence = 1234, $name : name)\n" +
+		"	$car : Car(company : $company, ownerLicense == licence, year == 2009)\n" + 
+		"then\n"+ 
+		"	System.out.println(\"licence 1234 has a new car\")\n" +
 		"end\n";
 	}
 
@@ -54,6 +61,12 @@ public class DRLAssistantTest extends TestCase {
 	public void testDontAssignFieldInsideRHS() throws Exception {
 		List<AssistantOption> options = ruleAssistant.getRuleAssistant(rule, 840);
 		assertEquals(options.size(), 0);
+	}
+	
+	public void testAssignYearFromSecondRule() throws Exception {
+		List<AssistantOption> options = ruleAssistant.getRuleAssistant(rule, 1010);
+		assertEquals(options.size(), 1);
+		System.out.println(options.get(0).getContent());
 	}
 	
 }

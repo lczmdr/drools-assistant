@@ -2,6 +2,7 @@ package org.drools.assistant.engine;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.drools.assistant.info.RuleRefactorInfo;
@@ -25,9 +26,7 @@ public class DRLParserEngine extends AbstractParserEngine {
 	private static final String RULE_THEN_DECLARATION = "(then|THEN)";
 	private static final String RULE_END_DECLARATION = "(end|END)";
 	
-	private static final String OPTIONAL_CR = "[\n]*";
 	private static final String OPTIONAL_TAB = "[\t]*";
-	private static final String OPTIONAL_SPACES = "[\\s]*";
 	
 	private static final String FULLY_QUALIFIED_NAME = "[\\w\\.]*";
 	private static final String ONE_OR_MORE_SPACES = "[\\s]+";
@@ -38,10 +37,11 @@ public class DRLParserEngine extends AbstractParserEngine {
 	private static final String IMPORT_PATTERN = IMPORT_DECLARATION + ONE_OR_MORE_SPACES + FULLY_QUALIFIED_NAME + ";"; // OK
 	private static final String GLOBAL_PATTERN = GLOBAL_DECLARATION + ONE_OR_MORE_SPACES + FULLY_QUALIFIED_NAME + ONE_OR_MORE_SPACES + "[\\w]*" + ONE_OR_MORE_SPACES + ""; // OK
 
-	private static final String RULE_PATTERN = RULE_DECLARATION + ONE_OR_MORE_SPACES + RULE_NAME + "[" + OPTIONAL_CR + OPTIONAL_TAB + OPTIONAL_SPACES + "]*" + RULE_WHEN_DECLARATION + "[" + OPTIONAL_CR + OPTIONAL_TAB + OPTIONAL_SPACES + "]*" + "[\\w\\W]*"; // works only with one rule :(
 	private static final String RULE_NAME_PATTERN = RULE_DECLARATION + ONE_OR_MORE_SPACES + RULE_NAME;
 	private static final String RULE_LHS_PATTERN = RULE_WHEN_DECLARATION + ONE_OR_MORE_SPACES + OPTIONAL_TAB + "[\\w\\W]*" + RULE_THEN_DECLARATION;
 	private static final String RULE_RHS_PATTERN = RULE_THEN_DECLARATION + ONE_OR_MORE_SPACES + "[\\w\\W]*" + RULE_END_DECLARATION;
+	
+	private static final Pattern rulePattern = Pattern.compile("^rule.+?end\\s*$", Pattern.MULTILINE | Pattern.DOTALL);
 	
 	public DRLParserEngine(String rule) {
 		this.ruleRefactorInfo = new DRLRuleRefactorInfo();
@@ -78,15 +78,18 @@ public class DRLParserEngine extends AbstractParserEngine {
 	}
 	
 	private void detectRules(CharSequence rule) {
-		pattern = Pattern.compile(RULE_PATTERN);
-		matcher = pattern.matcher(rule);
-		while (matcher.find()) {
-			String value = matcher.group();
-			int offset = matcher.start();
-			String ruleName = detectRuleName(value);
-			List<RuleLineContentInfo> lhs = detectLHS(value, offset);
-			List<RuleLineContentInfo> rhs = detectRHS(value, offset);
-			((DRLRuleRefactorInfo) ruleRefactorInfo).addContent(DRLContentTypeEnum.RULE, offset, value, ruleName, lhs, rhs);
+		Matcher ruleMatcher = rulePattern.matcher(rule);
+		int mIdx = 0;
+		while (ruleMatcher.find()) {
+			for( int position = 0; position < ruleMatcher.groupCount()+1; position++ ){
+				String value = ruleMatcher.group(position);
+				int offset = ruleMatcher.start();
+				String ruleName = detectRuleName(value);
+				List<RuleLineContentInfo> lhs = detectLHS(value, offset);
+				List<RuleLineContentInfo> rhs = detectRHS(value, offset);
+				((DRLRuleRefactorInfo) ruleRefactorInfo).addContent(DRLContentTypeEnum.RULE, offset, value, ruleName, lhs, rhs);
+			}
+			mIdx++;
 		}
 	}
 	

@@ -6,6 +6,7 @@ import junit.framework.TestCase;
 import org.drools.assistant.engine.DRLParserEngine;
 import org.drools.assistant.info.drl.DRLRuleRefactorInfo;
 import org.drools.assistant.info.drl.RuleBasicContentInfo;
+import org.drools.assistant.info.drl.RuleLineContentInfo;
 
 public class DRLParserEngineTest extends TestCase {
 
@@ -100,12 +101,24 @@ public class DRLParserEngineTest extends TestCase {
 						"\t\tm.setMessage( \"Goodbye cruel world\" );\n" +
 						"\t\tm.setStatus( Message.GOODBYE );\n" +
 						"\t\tupdate( m );\n" +
+						"end\n"+
+				"rule \"GoodBye World\"\n" +
+						"\twhen\n" +
+						"\t\tm : Message( status == Message.GOODBYE, myMessage : message )\n" +
+						"\t\tPrueba()\n" +
+						"\tthen\n" +
+						"\t\tSystem.out.println( myMessage );\n" +
+						"\t\tm.setMessage( \"Bon Giorno\" );\n" +
 						"end";
 		System.out.println(rule);
 		engine = new DRLParserEngine(rule);
 		info = (DRLRuleRefactorInfo) engine.parse();
 		RuleBasicContentInfo content = info.getContentAt(173);
-		System.out.println(content.getType() + " -> " + content.getContent() + " from " + content.getOffset() + " to " + (content.getOffset()+content.getContentLength()));
+		System.out.println(content.getType() + " -> " + content.getContent() + " from " + content.getOffset() + " to " + (content.getOffset()+content.getContentLength())
+				+ " from rule " + ((RuleLineContentInfo)content).getRule().getRuleName());
+		content = info.getContentAt(343);
+		System.out.println(content.getType() + " -> " + content.getContent() + " from " + content.getOffset() + " to " + (content.getOffset()+content.getContentLength())
+				+ " from rule " + ((RuleLineContentInfo)content).getRule().getRuleName());
 	}
 	
 }
