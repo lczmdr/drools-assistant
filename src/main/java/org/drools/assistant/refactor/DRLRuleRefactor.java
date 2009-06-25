@@ -8,8 +8,11 @@ import org.drools.assistant.info.drl.DRLContentTypeEnum;
 import org.drools.assistant.info.drl.DRLRuleRefactorInfo;
 import org.drools.assistant.info.drl.RuleBasicContentInfo;
 import org.drools.assistant.option.AssistantOption;
+import org.drools.assistant.option.RenameAssistantOption;
+import org.drools.assistant.option.ReplaceAssistantOption;
 import org.drools.assistant.refactor.drl.FixImport;
 import org.drools.assistant.refactor.drl.VariableBinding;
+import org.drools.assistant.refactor.drl.VariableRename;
 
 public class DRLRuleRefactor extends AbstractRuleRefactor {
 	
@@ -41,7 +44,7 @@ public class DRLRuleRefactor extends AbstractRuleRefactor {
 		String response = VariableBinding.execute(contentInfo, offset-contentInfo.getOffset());
 		if (response.equals(contentInfo.getContent()))
 			return null;
-		return new AssistantOption("assign to variable", response, contentInfo.getOffset(), contentInfo.getContentLength());
+		return new ReplaceAssistantOption("assign to variable", response, contentInfo.getOffset(), contentInfo.getContentLength(), offset);
 	}
 
 	@Override
@@ -57,6 +60,13 @@ public class DRLRuleRefactor extends AbstractRuleRefactor {
 
 	@Override
 	protected AssistantOption renameVariable(RuleBasicContentInfo contentInfo) {
+		if (contentInfo==null) return null;
+		if (!contentInfo.getType().equals(DRLContentTypeEnum.RULE_LHS_LINE) &&
+				!contentInfo.getType().equals(DRLContentTypeEnum.RULE_RHS_LINE))
+			return null;
+		String variable;
+		if ((variable = VariableRename.isPossible(contentInfo, offset-contentInfo.getOffset()))!=null)
+			return new RenameAssistantOption("rename variable", variable, contentInfo, offset);
 		return null;
 	}
 

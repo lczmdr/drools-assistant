@@ -5,6 +5,7 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.drools.assistant.option.AssistantOption;
+import org.drools.assistant.option.ReplaceAssistantOption;
 import org.drools.assistant.processor.AbstractRuleAssistantProcessor;
 import org.drools.assistant.processor.DRLRefactorProcessor;
 
@@ -32,7 +33,8 @@ public class FixImportTest extends TestCase {
 	public void testFirstTest() {
 		List<AssistantOption> options = ruleAssistant.getRuleAssistant(rule, 150);
 		assertEquals(1, options.size());
-		System.out.println("AssistantOption: " + options.get(0).getContent() + " -> at offset " + options.get(0).getOffset());
+		ReplaceAssistantOption assistantOption = (ReplaceAssistantOption) options.get(0);
+		System.out.println("AssistantOption: " + assistantOption.getContent() + " -> at offset " + assistantOption.getOffset());
 	}
 
 }

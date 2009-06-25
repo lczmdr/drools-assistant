@@ -1,5 +1,6 @@
 package org.drools.assistant.info.drl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RuleDRLContentInfo extends RuleBasicContentInfo {
@@ -41,6 +42,12 @@ public class RuleDRLContentInfo extends RuleBasicContentInfo {
 
 	public List<RuleLineContentInfo> getRHSRuleLines() {
 		return rhs;
+	}
+	
+	public List<RuleLineContentInfo> getAllLines() {
+		List<RuleLineContentInfo> all = new ArrayList<RuleLineContentInfo>(lhs);
+		all.addAll(rhs);
+		return all;
 	}
 
 }

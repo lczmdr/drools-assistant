@@ -5,6 +5,7 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.drools.assistant.option.AssistantOption;
+import org.drools.assistant.option.ReplaceAssistantOption;
 import org.drools.assistant.processor.AbstractRuleAssistantProcessor;
 import org.drools.assistant.processor.DRLRefactorProcessor;
 
@@ -55,7 +56,8 @@ public class DRLAssistantTest extends TestCase {
 	public void testAssignSalaryFieldToVariable() throws Exception {
 		List<AssistantOption> options = ruleAssistant.getRuleAssistant(rule, 820);
 		assertEquals(options.size(), 1);
-		System.out.println(options.get(0).getContent());
+		ReplaceAssistantOption assistantOption = (ReplaceAssistantOption) options.get(0);
+		System.out.println(assistantOption.getContent());
 	}
 	
 	public void testDontAssignFieldInsideRHS() throws Exception {
@@ -66,7 +68,8 @@ public class DRLAssistantTest extends TestCase {
 	public void testAssignYearFromSecondRule() throws Exception {
 		List<AssistantOption> options = ruleAssistant.getRuleAssistant(rule, 1010);
 		assertEquals(options.size(), 1);
-		System.out.println(options.get(0).getContent());
+		ReplaceAssistantOption assistantOption = (ReplaceAssistantOption) options.get(0);
+		System.out.println(assistantOption.getContent());
 	}
 	
 }

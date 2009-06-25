@@ -38,8 +38,8 @@ public class DRLParserEngine extends AbstractParserEngine {
 	private static final String GLOBAL_PATTERN = GLOBAL_DECLARATION + ONE_OR_MORE_SPACES + FULLY_QUALIFIED_NAME + ONE_OR_MORE_SPACES + "[\\w]*" + ONE_OR_MORE_SPACES + ""; // OK
 
 	private static final String RULE_NAME_PATTERN = RULE_DECLARATION + ONE_OR_MORE_SPACES + RULE_NAME;
-	private static final String RULE_LHS_PATTERN = RULE_WHEN_DECLARATION + ONE_OR_MORE_SPACES + OPTIONAL_TAB + "[\\w\\W]*" + RULE_THEN_DECLARATION;
-	private static final String RULE_RHS_PATTERN = RULE_THEN_DECLARATION + ONE_OR_MORE_SPACES + "[\\w\\W]*" + RULE_END_DECLARATION;
+	private static final String RULE_LHS_PATTERN = "[\\t\\s]*" + RULE_WHEN_DECLARATION + ONE_OR_MORE_SPACES + OPTIONAL_TAB + "[\\w\\W]*" + RULE_THEN_DECLARATION;
+	private static final String RULE_RHS_PATTERN = "[\\t\\s]*" + RULE_THEN_DECLARATION + ONE_OR_MORE_SPACES + "[\\w\\W]*" + RULE_END_DECLARATION;
 	
 	private static final Pattern rulePattern = Pattern.compile("^rule.+?end\\s*$", Pattern.MULTILINE | Pattern.DOTALL);
 	
@@ -79,17 +79,17 @@ public class DRLParserEngine extends AbstractParserEngine {
 	
 	private void detectRules(CharSequence rule) {
 		Matcher ruleMatcher = rulePattern.matcher(rule);
-		int mIdx = 0;
 		while (ruleMatcher.find()) {
 			for( int position = 0; position < ruleMatcher.groupCount()+1; position++ ){
 				String value = ruleMatcher.group(position);
 				int offset = ruleMatcher.start();
 				String ruleName = detectRuleName(value);
 				List<RuleLineContentInfo> lhs = detectLHS(value, offset);
+				// TODO: remove this awful line... need to optimize the lhs regex
+				lhs.remove(lhs.size()-1);
 				List<RuleLineContentInfo> rhs = detectRHS(value, offset);
 				((DRLRuleRefactorInfo) ruleRefactorInfo).addContent(DRLContentTypeEnum.RULE, offset, value, ruleName, lhs, rhs);
 			}
-			mIdx++;
 		}
 	}
 	

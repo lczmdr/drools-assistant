@@ -6,6 +6,7 @@ import java.util.List;
 import org.drools.assistant.info.RuleRefactorInfo;
 import org.drools.assistant.info.drl.RuleBasicContentInfo;
 import org.drools.assistant.option.AssistantOption;
+import org.drools.assistant.option.ReplaceAssistantOption;
 
 public class DSLRuleRefactor extends AbstractRuleRefactor {
 	
@@ -26,17 +27,17 @@ public class DSLRuleRefactor extends AbstractRuleRefactor {
 	}
 
 	@Override
-	protected AssistantOption bindVariable(RuleBasicContentInfo contentInfo) {
+	protected ReplaceAssistantOption bindVariable(RuleBasicContentInfo contentInfo) {
 		return null;
 	}
 
 	@Override
-	protected AssistantOption fixImports(RuleBasicContentInfo contentInfo) {
+	protected ReplaceAssistantOption fixImports(RuleBasicContentInfo contentInfo) {
 		return null;
 	}
 
 	@Override
-	protected AssistantOption renameVariable(RuleBasicContentInfo contentInfo) {
+	protected ReplaceAssistantOption renameVariable(RuleBasicContentInfo contentInfo) {
 		return null;
 	}
 

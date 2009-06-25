@@ -1,19 +1,13 @@
 package org.drools.assistant.option;
 
-public class AssistantOption {
+public abstract class AssistantOption {
 	
-	private String display;
-	private String content;
-	private Integer length;
-	private Integer offset;
-	
-	public AssistantOption(String display, String content, Integer offset, int length) {
-		this.display = display;
-		this.content = content;
-		this.offset = offset;
-		this.length = length;
-	}
-	
+	protected String display;
+	protected String content;
+	protected Integer length;
+	protected Integer offset;
+	protected Integer position;
+
 	public String getDisplay() {
 		return display;
 	}
@@ -29,11 +23,20 @@ public class AssistantOption {
 	public Integer getLength() {
 		return length;
 	}
+	public void setLength(Integer length) {
+		this.length = length;
+	}
 	public Integer getOffset() {
 		return offset;
 	}
 	public void setOffset(Integer offset) {
 		this.offset = offset;
+	}
+	public void setPosition(Integer position) {
+		this.position = position;
+	}
+	public Integer getPosition() {
+		return position;
 	}
 	
 }
