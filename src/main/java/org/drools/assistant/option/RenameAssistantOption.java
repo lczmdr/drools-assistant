@@ -10,6 +10,8 @@ public class RenameAssistantOption extends AssistantOption {
 		this.display = display;
 		this.content = content;
 		this.contentInfo = contentInfo;
+		this.offset = position;
+		// FIXME: weird assignation
 		this.position = position;
 	}
 

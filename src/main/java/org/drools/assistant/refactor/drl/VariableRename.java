@@ -110,4 +110,15 @@ public class VariableRename {
 		return 0;
 	}
 	
+	public static boolean validateVariable(String variable) {
+		String regex = "\\$[\\w]*||[a-zA-Z]{1}[\\w]*";
+		Pattern pattern = Pattern.compile(regex);
+		Matcher matcher = pattern.matcher(variable);
+		return matcher.find();
+	}
+	
+	public static void main(String[] args) {
+		System.out.println(validateVariable("1$nodeberia"));
+	}
+	
 }

@@ -66,7 +66,7 @@ public class DRLRuleRefactor extends AbstractRuleRefactor {
 			return null;
 		String variable;
 		if ((variable = VariableRename.isPossible(contentInfo, offset-contentInfo.getOffset()))!=null)
-			return new RenameAssistantOption("rename variable", variable, contentInfo, offset);
+			return new RenameAssistantOption("rename variable", variable, contentInfo, contentInfo.getOffset());
 		return null;
 	}
 
