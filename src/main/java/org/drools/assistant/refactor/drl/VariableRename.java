@@ -10,20 +10,20 @@ import org.drools.assistant.info.drl.RuleLineContentInfo;
 import org.drools.assistant.option.AssistantOption;
 import org.drools.assistant.option.RenameAssistantOption;
 
-public class VariableRename {
+public class VariableRename extends Variable {
 
-	public static AssistantOption execute(AssistantOption assistantOption, String newVariableName) {
-		if (!(assistantOption instanceof RenameAssistantOption))
+	public static AssistantOption execute(RenameAssistantOption assistantOption, String newVariableName) {
+		detectCurrentVariables(assistantOption.getContentInfo());
+		if (existsVariableWithSameName(newVariableName))
 			return null;
-		RenameAssistantOption renameAssistantOption = (RenameAssistantOption)assistantOption;
-		RuleDRLContentInfo ruleDRLContentInfo = ((RuleLineContentInfo)renameAssistantOption.getContentInfo()).getRule();
+		RuleDRLContentInfo ruleDRLContentInfo = ((RuleLineContentInfo)assistantOption.getContentInfo()).getRule();
 		String rule = getAllRuleLines(ruleDRLContentInfo);
 		Integer offset = getOffsetFirstLine(ruleDRLContentInfo);
-		String content = replaceAllVariables(rule, renameAssistantOption.getContent(), newVariableName);
-		renameAssistantOption.setContent(content);
-		renameAssistantOption.setOffset(offset);
-		renameAssistantOption.setLength(rule.length());
-		return renameAssistantOption;
+		String content = replaceAllVariables(rule, assistantOption.getContent(), newVariableName);
+		assistantOption.setContent(content);
+		assistantOption.setOffset(offset);
+		assistantOption.setLength(rule.length());
+		return assistantOption;
 	}
 	
 	public static String isPossible(RuleBasicContentInfo contentInfo, int offset) {
@@ -94,9 +94,12 @@ public class VariableRename {
 		newVariableName = createPatternToFoundAndReplace(newVariableName);
 		variableName = createPatternToFoundAndReplace(variableName);
 		if(variableName.charAt(0)=='$' || variableName.charAt(0)=='\\')
-			rule = rule.replaceAll("\\B("+variableName+")\\b", newVariableName);
-		else
-			rule = rule.replaceAll("\\b"+variableName+"\\b", newVariableName);
+			return rule.replaceAll("\\B("+variableName+")\\b", newVariableName);
+		rule = rule.replaceAll("\\b"+variableName+"\\s*\\:\\s*", newVariableName + " : ");
+		rule = rule.replaceAll("\\b"+variableName+"\\.", newVariableName + ".");
+		rule = rule.replaceAll("\\b"+variableName+"\\s*\\,\\s*", newVariableName + " , ");
+		rule = rule.replaceAll("\\b"+variableName+"\\s*\\)\\s*", newVariableName + " ) ");
+		rule = rule.replaceAll("\\b"+variableName+"\\s*\\+\\s*", newVariableName + " + ");
 		return rule;
 	}
 	

@@ -18,11 +18,11 @@ public class DRLParserEngineTest extends TestCase {
 	protected void setUp() throws Exception {
 		rule = 	"package org.drools.assistant.test;\n\n" +
 		"import org.drools.assistant.test.model.Company;\n" +
-		"IMPORT org.drools.assistant.test.model.Employee;\n\n" +
+		"import org.drools.assistant.test.model.Employee;\n\n" +
 		"import function org.drools.assistant.model.Class1.anotherFunction \n" +
 		"import		function org.drools.assistant.model.Class1.mathFunction \n" +
 		"global     org.drools.assistant.test.model.Class2    results \n"+
-		"GLOBAL org.drools.assistant.test.model.Class3 current\n"+ 
+		"global org.drools.assistant.test.model.Class3 current\n"+ 
 		"expander help-expander.dsl\n" +
 		"query \"all clients\"\n" +
 		"	result : Clients()\n" +
@@ -36,7 +36,7 @@ public class DRLParserEngineTest extends TestCase {
 		"function String helloWithAge(String name, Integer age) {\n"+
 		"    return \"Hello2 \"+name+\"! \" + age;\n"+
 		"}\n" +
-		"rule   \"My Test Rule\"\n" +
+		"\trule   \"My Test Rule\"\n" +
 		"when\n"+ 
 		"	$employee : Employee($company : company, $age : age > 80, salary > 400)\n" +
 		"	$result : Company(company == $company, retireAge <= $age)\n" + 
@@ -92,7 +92,7 @@ public class DRLParserEngineTest extends TestCase {
 		rule = "package com.sample\n\n" +
 				"import com.sample.DroolsTest.Message;\n" +
 				"import com.sample.Prueba;\n\n" +
-				"rule \"Hello World\"\n" +
+				"\trule \"Hello World\"\n" +
 						"\twhen\n" +
 						"\t\tm : Message( status == Message.HELLO, myMessage : message )\n" +
 						"\t\tPrueba()\n" +

@@ -38,10 +38,10 @@ public class DRLParserEngine extends AbstractParserEngine {
 	private static final String GLOBAL_PATTERN = GLOBAL_DECLARATION + ONE_OR_MORE_SPACES + FULLY_QUALIFIED_NAME + ONE_OR_MORE_SPACES + "[\\w]*" + ONE_OR_MORE_SPACES + ""; // OK
 
 	private static final String RULE_NAME_PATTERN = RULE_DECLARATION + ONE_OR_MORE_SPACES + RULE_NAME;
-	private static final String RULE_LHS_PATTERN = "[\\t\\s]*" + RULE_WHEN_DECLARATION + ONE_OR_MORE_SPACES + OPTIONAL_TAB + "[\\w\\W]*" + RULE_THEN_DECLARATION;
+	private static final String RULE_LHS_PATTERN = "[\\t\\s]*" + RULE_WHEN_DECLARATION + ONE_OR_MORE_SPACES + OPTIONAL_TAB + "[\\w\\W]*" + "(?=" + RULE_THEN_DECLARATION + ")";
 	private static final String RULE_RHS_PATTERN = "[\\t\\s]*" + RULE_THEN_DECLARATION + ONE_OR_MORE_SPACES + "[\\w\\W]*" + RULE_END_DECLARATION;
 	
-	private static final Pattern rulePattern = Pattern.compile("^rule.+?end\\s*$", Pattern.MULTILINE | Pattern.DOTALL);
+	private static final Pattern rulePattern = Pattern.compile("rule.+?end\\s*$", Pattern.MULTILINE | Pattern.DOTALL);
 	
 	public DRLParserEngine(String rule) {
 		this.ruleRefactorInfo = new DRLRuleRefactorInfo();
@@ -104,8 +104,10 @@ public class DRLParserEngine extends AbstractParserEngine {
 	private List<RuleLineContentInfo> detectLHS(CharSequence rule, int ruleOffset) {
 		pattern = Pattern.compile(RULE_LHS_PATTERN);
 		matcher = pattern.matcher(rule);
-		if (matcher.find())
+		if (matcher.find()) {
+			System.out.println("LHS: \n" + matcher.group());
 			return detectLines(matcher.group(), matcher.start() + ruleOffset, DRLContentTypeEnum.RULE_LHS_LINE);
+		}
 		return null;
 	}
 	

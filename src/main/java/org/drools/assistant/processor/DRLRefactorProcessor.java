@@ -5,6 +5,7 @@ import java.util.List;
 import org.drools.assistant.engine.DRLParserEngine;
 import org.drools.assistant.info.RuleRefactorInfo;
 import org.drools.assistant.option.AssistantOption;
+import org.drools.assistant.option.RenameAssistantOption;
 import org.drools.assistant.refactor.DRLRuleRefactor;
 import org.drools.assistant.refactor.drl.VariableRename;
 
@@ -26,7 +27,7 @@ public class DRLRefactorProcessor extends AbstractRuleRefactorProcessor {
 		return info;
 	}
 	
-	public AssistantOption executeVariableRename(AssistantOption assistantOption, String newVariableName) {
+	public AssistantOption executeVariableRename(RenameAssistantOption assistantOption, String newVariableName) {
 		return VariableRename.execute(assistantOption, newVariableName);
 	}
 
