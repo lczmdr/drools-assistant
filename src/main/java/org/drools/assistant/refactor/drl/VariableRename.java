@@ -52,17 +52,6 @@ public class VariableRename extends Variable {
 		return rule.substring(0, rule.length()-1);
 	}
 	
-	public static boolean isPossible(String line, int offset) {
-		int offsetStart = detectVariableOffsetStart(line, offset);
-		if (offsetStart==-1)
-			return false;
-		String right = line.substring(offsetStart);
-		String variableName = detectVariableToReplace(right);
-		if (variableName==null)
-			return false;
-		return hasMoreVariableToReplace(line, variableName);
-	}
-	
 	private static boolean hasMoreVariableToReplace(String line, String variableName) {
 		variableName = createPatternToFoundAndReplace(variableName);
 		Pattern pattern = Pattern.compile(variableName+"\\b");
@@ -111,17 +100,6 @@ public class VariableRename extends Variable {
 				return -1;
 		}
 		return 0;
-	}
-	
-	public static boolean validateVariable(String variable) {
-		String regex = "\\$[\\w]*||[a-zA-Z]{1}[\\w]*";
-		Pattern pattern = Pattern.compile(regex);
-		Matcher matcher = pattern.matcher(variable);
-		return matcher.find();
-	}
-	
-	public static void main(String[] args) {
-		System.out.println(validateVariable("1$nodeberia"));
 	}
 	
 }
